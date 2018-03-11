@@ -339,6 +339,22 @@ package_option() {
   eval "$variable=( \"\${value[@]}\" )"
 }
 
+build_package_config() {
+  local package_name="$1"
+
+  if [ "${MAKEOPTS+defined}" ]; then
+    MAKE_OPTS="$MAKEOPTS"
+  elif [ -z "${MAKE_OPTS+defined}" ]; then
+    MAKE_OPTS="-j 2"
+  fi
+
+  { mv config config.orig
+    sed -e "s:INSTALL_ROOT=[ 	]*/usr/local:INSTALL_ROOT= \"${PREFIX_PATH}\":g" config.orig > config
+    "$MAKE" $MAKE_OPTS INSTALL_MAN="$PREFIX_PATH/share/man/man1"
+    "$MAKE" $MAKE_OPTS install INSTALL_MAN="$PREFIX_PATH/share/man/man1"
+  } >&4 2>&1
+}
+
 build_package_configure() {
   local package_name="$1"
 
